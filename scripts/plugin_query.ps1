@@ -20,8 +20,6 @@ $secret = $ConfigFile.Settings.Access.SecretKey
 
 # Header
 $headers = "accessKey=$access; secretKey=$secret"
-#Set-Location /Users/bcook/Desktop/PowershellOC
-#Set-Location c:\{path to directory where this script is located}
 
 # Request a report to be generated
 function listSystems($reportFormat, $reportValue, $Reportchapter, $pluginID)

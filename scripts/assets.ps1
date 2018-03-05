@@ -26,9 +26,6 @@ $secret = $ConfigFile.Settings.Access.SecretKey
 
 # Header
 $headers = "accessKey=$access; secretKey=$secret"
-Set-Location /Users/bcook/Desktop/Powershell
-#Set-Location c:\{path to directory where this script is located}
-#Set-Location C:\temp
 
 # Variables
 $tempFile1="tenable_io.csv"

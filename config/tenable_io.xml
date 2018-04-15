@@ -2,7 +2,7 @@
 <Settings>
   <Access>
     <Url>https://cloud.tenable.com</Url>
-    <AccessKey>{Enter account API Access Key}{/AccessKey>
+    <AccessKey>{Enter account API Access Key}</AccessKey>
     <SecretKey>{Enter account API Access Key}</SecretKey>
   </Access>
 </Settings>

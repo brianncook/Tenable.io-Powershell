@@ -6,7 +6,7 @@
 # Requirement: You must have tenable_io.xml on your system as this script will pull your Access Key and Secret Key from that file. 
 #              Place the file in a location that is secure yet this script has the ability read.
 #
-# Version: .1 Initial Script February 21, 2017
+# Version: .1 Initial Script December 20, 2017
 #		        Create report
 # 
 ####
@@ -22,39 +22,36 @@ $secret = $ConfigFile.Settings.Access.SecretKey
 $headers = "accessKey=$access; secretKey=$secret"
 
 # Request a report to be generated
-function listSystems($reportFormat, $reportValue, $Reportchapter, $pluginID)
-{
-$object = "workbenches/export?format=$reportFormat&report=$reportValue&chapter=$reportChapter&plugin_id=$pluginID"
-$response = Invoke-RestMethod -Method Get -Uri $Tenableio/$object -Header @{ "X-ApiKeys" = $headers }
-Write-Host $response[0].outputs
-return $response[0].file
+function listSystems($reportFormat, $reportValue, $Reportchapter, $pluginID) {
+  $object = "workbenches/export?format=$reportFormat&report=$reportValue&chapter=$reportChapter&plugin_id=$pluginID"
+  $response = Invoke-RestMethod -Method Get -Uri $Tenableio/$object -Header @{ "X-ApiKeys" = $headers }
+  Write-Host $response[0].outputs
+  return $response[0].file
 }
 
 # Request a report to be generated
-function Download-Report($inFile, $title, $fileExtension)
-{
-$outFile=($title + "." + $fileExtension)
-# Query Tenable.io to see if the requested file for status. 
-DO {
-$object = "workbenches/export/$inFile/status"
-$response = Invoke-RestMethod -Method Get -Uri $Tenableio/$object -Header @{ "X-ApiKeys" = $headers }
-Write-Host $response[0].status
+function Download-Report($inFile, $title, $fileExtension) {
+  $outFile=($title + "." + $fileExtension)
+  # Query Tenable.io to see if the requested file for status. 
+  DO {
+    $object = "workbenches/export/$inFile/status"
+    $response = Invoke-RestMethod -Method Get -Uri $Tenableio/$object -Header @{ "X-ApiKeys" = $headers }
+    Write-Host $response[0].status
   }
-Until ($response[0].status -eq "ready")
+  Until ($response[0].status -eq "ready")
 
-# Once the file is ready, pull down and save to the local system.
-$object = "workbenches/export/$inFile/download"
+  # Once the file is ready, pull down and save to the local system.
+  $object = "workbenches/export/$inFile/download"
 
-Write-Host $object
-$response = Invoke-RestMethod -Method Get -Uri $Tenableio/$object -Header @{ "X-ApiKeys" = $headers } -OutFile $outFile
+  Write-Host $object
+  $response = Invoke-RestMethod -Method Get -Uri $Tenableio/$object -Header @{ "X-ApiKeys" = $headers } -OutFile $outFile
 }
 
-function reportSeverity($authenticated, $exploitable, $severity, $title)
-{
-$outFile=($title + ".csv")
-$object = "workbenches/vulnerabilities?authenticated=$authenticated&exploitable=$exploitable&resolvable=false&severity=$severity"
-$response = Invoke-RestMethod -Method Get -Uri $Tenableio/$object -Header @{ "X-ApiKeys" = $headers }
-$response.vulnerabilities | select plugin_id, plugin_name, plugin_family, severity, count, accepted_count, recasted_count | export-csv $outFile -noType
+function reportSeverity($authenticated, $exploitable, $severity, $title) {
+  $outFile=($title + ".csv")
+  $object = "workbenches/vulnerabilities?authenticated=$authenticated&exploitable=$exploitable&resolvable=false&severity=$severity"
+  $response = Invoke-RestMethod -Method Get -Uri $Tenableio/$object -Header @{ "X-ApiKeys" = $headers }
+  $response.vulnerabilities | select plugin_id, plugin_name, plugin_family, severity, count, accepted_count, recasted_count | export-csv $outFile -noType
 }
 
 # Main script

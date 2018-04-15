@@ -13,7 +13,7 @@
 
 # Import configuration settings
 # 
-[xml]$ConfigFile = Get-Content C:\{path_to_file}\tenable_io.xml
+[xml]$ConfigFile = Get-Content C:\{path_to_file}\config\tenable_io.xml
 $Tenableio = $ConfigFile.Settings.Access.Url
 $access = $ConfigFile.Settings.Access.AccessKey
 $secret = $ConfigFile.Settings.Access.SecretKey

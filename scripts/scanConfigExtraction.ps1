@@ -12,8 +12,16 @@
 #               Added scan info extraction
 #          .3 Modified November 1, 2017
 #               Modified plugin ID from 10180 (ping) to 19506 (Nessus Scan Information)
+#          .4 Modified May 8, 2018
+#               Added scanner data extraction
+#          .5 Modified May 16, 2018
+#               Add use of PSExcel Installation process:   Install-Module -Name PSExcel
+#               Results saved in Excel Workbook
 #
 ####
+
+# Pull in any needed modules.
+Import-Module PSExcel
 
 # Import configuration settings
 [xml]$ConfigFile = Get-Content C:\{path_to_file}\config\tenable_io.xml
@@ -22,36 +30,38 @@ $access = $ConfigFile.Settings.Access.AccessKey
 $secret = $ConfigFile.Settings.Access.SecretKey
 $headers = "accessKey=$access; secretKey=$secret"
 
-# Names of files that data will be saved too.
-$scanFile = "scans.csv"
-$exclusionFile ="exclusions.csv"
-$targetGroupFile = "target_groups.csv"
-$policyFile = "policies.csv"
-$scanDataFile = "scan_data.csv"
+# Name and location of file that data will be saved too.
+$excelFile =  "c:\temp\Tenable_io.XLSX"
+
+### Get list of scanners
+$scaners = @()
+$response = Invoke-RestMethod -Method Get -Uri $Tenableio/scanners -Header @{ "X-ApiKeys" = $headers }
+$scaners = $($response.scanners | select name, enviroment, status, group, distro, platform, engine_version, id, load_plugin_set, type)
+$scaners | Export-XLSX $excelFile -WorksheetName Scanners -Table -AutoFit
 
 ### Get Scan Info.
 $scans = @()
 $response = Invoke-RestMethod -Method Get -Uri $Tenableio/scans -Header @{ "X-ApiKeys" = $headers }
 $scans = $($response.scans | select name, id, shared, starttime, owner, timezone, schedule_uuid, enabled)
-$scans | export-csv $scanFile -noType
+$scans | Export-XLSX $excelFile -WorksheetName Scans -Table -AutoFit
 
 ### Get List of Exclusions
 $exclusions = @()
 $response = Invoke-RestMethod -Method Get -Uri $Tenableio/exclusions -Header @{ "X-ApiKeys" = $headers }
-$exclusions = $($response.exclusions | select-object name, id, members)
-$exclusions | Export-Csv $exclusionFile -noType
+$exclusions = $($response.exclusions | select-object name, id, members, description, schedule)
+$exclusions | Export-XLSX $excelFile -WorksheetName Exclusions -Table -AutoFit
 
 ### Get list of System Target Groups
 $targetGroups = @()
 $response = Invoke-RestMethod -Method Get -Uri $Tenableio/target-groups -Header @{ "X-ApiKeys" = $headers }
-$targetGroups = $($response.target_groups | select name, id, members, creation_date, last_modification_date)
-$targetGroups | Export-Csv $targetGroupFile -noType
+$targetGroups = $($response.target_groups | select name, id, members, creation_date, last_modification_date, acls)
+$targetGroups | Export-XLSX $excelFile -WorksheetName Target_Groups -Table -AutoFit
 
 ### Get List of Policies
 $policies = @()
 $response = Invoke-RestMethod -Method Get -Uri $Tenableio/policies -Header @{ "X-ApiKeys" = $headers }
-$policies = $($response.policies | select name, id, owner, members, creation_date, last_modification_date)
-$policies | Export-Csv $policyFile -noType
+$policies = $($response.policies | select name, id, owner, creation_date, last_modification_date,shared, visibility, template_uuid)
+$policies | Export-XLSX $excelFile -WorksheetName Policies -Table -AutoFit
 
 ### Get List of Scan Configurations to Include Names of Target Groups
 $hashtable = @()
@@ -81,4 +91,4 @@ $hashtable += $row
 }
 
 # Save the results that are in the hashtable to a CSV.
-$hashtable | sort-object Scan_Name | select-object Scan_Name, Scan_ID, Target_Groups | Get-unique -AsString | Export-Csv $scanDataFile -noType
+$hashtable | sort-object Scan_Name | select-object Scan_Name, Scan_ID, Target_Groups | Get-unique -AsString | Export-XLSX $excelFile -WorksheetName Scan_Configurations -Table -AutoFit

@@ -5,4 +5,12 @@
     <AccessKey>{Enter account API Access Key}</AccessKey>
     <SecretKey>{Enter account API Access Key}</SecretKey>
   </Access>
+  <SMTP>
+    <SMPTServer>{Enter the email server IP or FQDN}</SMPTServer>
+    <SMTPPort>{Enter the port of the email server}</SMTPPort>
+    <From>{Enter email account the email will be tied too}</From>
+    <To>{Enter email account to send to}</To>
+    <SMTPAccount>{Enter ID if authentication is required}</SMTPAccount>
+    <SMTPPassword>{Enter password if authentication is required}</SMTPPassword>
+  </SMTP>
 </Settings>

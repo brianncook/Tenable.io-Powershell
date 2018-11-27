@@ -32,36 +32,37 @@ $headers = "accessKey=$access; secretKey=$secret"
 
 # Name and location of file that data will be saved too.
 $excelFile =  "c:\temp\Tenable_io.XLSX"
+Remove-Item -Path $excelfile
 
 ### Get list of scanners
 $scaners = @()
 $response = Invoke-RestMethod -Method Get -Uri $Tenableio/scanners -Header @{ "X-ApiKeys" = $headers }
 $scaners = $($response.scanners | select name, enviroment, status, group, distro, platform, engine_version, id, load_plugin_set, type)
-$scaners | Export-XLSX $excelFile -WorksheetName Scanners -Table -AutoFit
+$scaners | Export-XLSX -Path $excelFile -WorksheetName Scanners -Table
 
 ### Get Scan Info.
 $scans = @()
 $response = Invoke-RestMethod -Method Get -Uri $Tenableio/scans -Header @{ "X-ApiKeys" = $headers }
 $scans = $($response.scans | select name, id, shared, starttime, owner, timezone, schedule_uuid, enabled)
-$scans | Export-XLSX $excelFile -WorksheetName Scans -Table -AutoFit
+$scans | Export-XLSX -Path $excelFile -WorksheetName Scans -Table 
 
 ### Get List of Exclusions
 $exclusions = @()
 $response = Invoke-RestMethod -Method Get -Uri $Tenableio/exclusions -Header @{ "X-ApiKeys" = $headers }
 $exclusions = $($response.exclusions | select-object name, id, members, description, schedule)
-$exclusions | Export-XLSX $excelFile -WorksheetName Exclusions -Table -AutoFit
+$exclusions | Export-XLSX -Path $excelFile -WorksheetName Exclusions -Table
 
 ### Get list of System Target Groups
 $targetGroups = @()
 $response = Invoke-RestMethod -Method Get -Uri $Tenableio/target-groups -Header @{ "X-ApiKeys" = $headers }
 $targetGroups = $($response.target_groups | select name, id, members, creation_date, last_modification_date, acls)
-$targetGroups | Export-XLSX $excelFile -WorksheetName Target_Groups -Table -AutoFit
+$targetGroups | Export-XLSX -Path $excelFile -WorksheetName Target_Groups -Table
 
 ### Get List of Policies
 $policies = @()
 $response = Invoke-RestMethod -Method Get -Uri $Tenableio/policies -Header @{ "X-ApiKeys" = $headers }
 $policies = $($response.policies | select name, id, owner, creation_date, last_modification_date,shared, visibility, template_uuid)
-$policies | Export-XLSX $excelFile -WorksheetName Policies -Table -AutoFit
+$policies | Export-XLSX -Path $excelFile -WorksheetName Policies -Table
 
 ### Get List of Scan Configurations to Include Names of Target Groups
 $hashtable = @()
@@ -91,4 +92,4 @@ $hashtable += $row
 }
 
 # Save the results that are in the hashtable to a CSV.
-$hashtable | sort-object Scan_Name | select-object Scan_Name, Scan_ID, Target_Groups | Get-unique -AsString | Export-XLSX $excelFile -WorksheetName Scan_Configurations -Table -AutoFit
+$hashtable | sort-object Scan_Name | select-object Scan_Name, Scan_ID, Target_Groups | Get-unique -AsString | Export-XLSX -Path $excelFile -WorksheetName Scan_Configurations -Table

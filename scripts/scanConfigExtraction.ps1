@@ -54,7 +54,7 @@ $origin = New-Object -Type DateTime -ArgumentList 1970, 1, 1, 0, 0, 0, 0
 $ag = @()
 $response = Invoke-RestMethod -Method Get -Uri $Tenableio/access-groups -Header @{ "X-ApiKeys" = $headers }
 $ag = $($response.access_groups)
-$ag | sort-object name | Export-XLSX -Path $excelFile -WorksheetName Access_Groups -Table
+$ag | sort-object name | Export-XLSX -Path $excelFile -WorksheetName Access-Groups -Table
 
 ### Get list of groups
 $groups = @()
